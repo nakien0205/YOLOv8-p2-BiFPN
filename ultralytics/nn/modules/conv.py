@@ -10,6 +10,7 @@ import torch
 import torch.nn as nn
 
 __all__ = (
+    "BiFPN_Concat",
     "CBAM",
     "ChannelAttention",
     "Concat",
@@ -639,6 +640,56 @@ class Concat(nn.Module):
             (torch.Tensor): Concatenated tensor.
         """
         return torch.cat(x, self.d)
+    
+
+class BiFPN_Concat(nn.Module):
+    """Concatenate a list of tensors with Normalized Fusion Score
+
+    Attributes:
+        d (int): Dimension along which to concatenate tensors.
+    """
+
+    def __init__(self, n=2, dimension=1):
+        """Initialize Concat module.
+        
+        Args:
+            n (int): Input tensor length
+            dimension (int): Dimension along which to concatenate tensors.
+        """
+        super(BiFPN_Concat, self).__init__()
+        self.w = nn.Parameter(torch.ones(n, dtype=torch.float32), requires_grad=True)
+        self.eps = 1e-4
+        self.d = dimension
+
+
+    ### Cannot use Kaiming because it is NOT designed for convolution weight matrices (2D+)
+    # def reset_parameter(self, mode='fan_in', nonlinearity='relu'):
+    #     """Use Kaiming normal for parameter, see torch.nn.init.kaiming_normal_ for more info
+        
+    #     Args:
+    #         mode (str=fan_in): Type of mode used
+    #         nonlinearity (str=relu): Type of non-linear function used
+    #     """
+    #     with torch.inference_mode():
+    #         torch.nn.init.kaiming_normal_(self.w, mode=mode, nonlinearity=nonlinearity)
+
+    def forward(self, x: list[torch.Tensor]):
+        """Concatenate input tensors along specified dimension with Normalized Fusion score
+        
+        Args:
+            x (list[torch.Tensor]): Input tensor
+            
+        Returns:
+            (torch.Tensor): Concatenated tensor
+        """
+        w = torch.relu(self.w)
+        weighted_sum = torch.sum(w) + self.eps
+
+        output = []
+        for i in range(len(x)):
+            output.append((w[i] * x[i]) / weighted_sum)
+
+        return torch.cat(output, dim=self.d)
 
 
 class Index(nn.Module):
