@@ -24,6 +24,7 @@ __all__ = (
     "Index",
     "LightConv",
     "RepConv",
+    "SPDConv",
     "SpatialAttention",
 )
 
@@ -307,6 +308,32 @@ class Focus(nn.Module):
         """
         return self.conv(torch.cat((x[..., ::2, ::2], x[..., 1::2, ::2], x[..., ::2, 1::2], x[..., 1::2, 1::2]), 1))
         # return self.conv(self.contract(x))
+
+
+class SPDConv(nn.Module):
+    """Space-to-Depth convolution block for downsampling by 2.
+
+    Rearranges spatial information (2x2 neighborhoods) into channels, then applies convolution.
+    """
+
+    def __init__(self, c1, c2, k=3, s=1, p=None, g=1, act=True):
+        """Initialize SPDConv module.
+
+        Args:
+            c1 (int): Number of input channels.
+            c2 (int): Number of output channels.
+            k (int): Convolution kernel size after space-to-depth.
+            s (int): Convolution stride after space-to-depth.
+            p (int, optional): Convolution padding.
+            g (int): Convolution groups.
+            act (bool | nn.Module): Activation function.
+        """
+        super().__init__()
+        self.conv = Conv(c1 * 4, c2, k, s, p, g, act=act)
+
+    def forward(self, x):
+        """Apply space-to-depth rearrangement and convolution."""
+        return self.conv(torch.cat((x[..., ::2, ::2], x[..., 1::2, ::2], x[..., ::2, 1::2], x[..., 1::2, 1::2]), 1))
 
 
 class GhostConv(nn.Module):

@@ -100,6 +100,10 @@ warmup_epochs: 3.0 # (float) warmup epochs (fractions allowed)
 warmup_momentum: 0.8 # (float) initial momentum during warmup
 warmup_bias_lr: 0.1 # (float) bias learning rate during warmup
 box: 7.5 # (float) box loss gain
+bbox_loss: ciou # (str) bbox loss type: ciou|wiou|nwd|nwd_iou
+nwd_tau: 2.0 # (float) normalization factor for NWD similarity (used by nwd/nwd_iou)
+nwd_iou_ratio: 0.5 # (float) NWD ratio in nwd_iou blend; IoU ratio is (1 - this)
+wiou_gamma: 1.0 # (float) focusing strength for WIoU distance weighting
 cls: 0.5 # (float) classification loss gain
 dfl: 1.5 # (float) distribution focal loss gain
 pose: 12.0 # (float) pose loss gain (pose tasks)

@@ -75,6 +75,7 @@ from .conv import (
     Index,
     LightConv,
     RepConv,
+    SPDConv,
     SpatialAttention,
 )
 from .head import (
@@ -179,6 +180,7 @@ __all__ = (
     "SCDown",
     "Segment",
     "Segment26",
+    "SPDConv",
     "SpatialAttention",
     "TorchVision",
     "TransformerBlock",
